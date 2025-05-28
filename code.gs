@@ -1,5 +1,5 @@
 function fetchAndWriteNewsData() {
-  // ✅ Configurable constants
+  // Configurable constants
   const NEWS_SOURCES = {
       "https://ndtv.in/"
   };
@@ -16,9 +16,9 @@ function fetchAndWriteNewsData() {
   const rows = [];
 
   for (let language in NEWS_SOURCES) {
-    Logger.log(`⏳ Starting language: ${language}`);
+    Logger.log(`Starting language: ${language}`);
     for (let site of NEWS_SOURCES[language]) {
-      Logger.log(`🔍 Checking site: ${site}`);
+      Logger.log(`Checking site: ${site}`);
       try {
         const baseUrl = site.replace(/\/$/, "");
         const robotsUrl = baseUrl + "/robots.txt";
@@ -27,7 +27,7 @@ function fetchAndWriteNewsData() {
         try {
           robotsResponse = UrlFetchApp.fetch(robotsUrl, { muteHttpExceptions: true });
         } catch (err) {
-          Logger.log(`❌ Failed to fetch robots.txt from ${robotsUrl}: ${err.message}`);
+          Logger.log(`Failed to fetch robots.txt from ${robotsUrl}: ${err.message}`);
           continue;
         }
 
@@ -43,7 +43,7 @@ function fetchAndWriteNewsData() {
         }
 
         if (!sitemapUrl) {
-          Logger.log(`⚠️ No news sitemap found for ${site}`);
+          Logger.log(` No news sitemap found for ${site}`);
           continue;
         }
 
@@ -51,7 +51,7 @@ function fetchAndWriteNewsData() {
         try {
           sitemapXml = UrlFetchApp.fetch(sitemapUrl).getContentText();
         } catch (err) {
-          Logger.log(`❌ Error fetching sitemap URL: ${sitemapUrl}: ${err.message}`);
+          Logger.log(`Error fetching sitemap URL: ${sitemapUrl}: ${err.message}`);
           continue;
         }
 
@@ -60,7 +60,7 @@ function fetchAndWriteNewsData() {
           document = XmlService.parse(sitemapXml);
           root = document.getRootElement();
         } catch (err) {
-          Logger.log(`❌ XML parse error for ${sitemapUrl}: ${err.message}`);
+          Logger.log(`XML parse error for ${sitemapUrl}: ${err.message}`);
           continue;
         }
 
@@ -68,11 +68,11 @@ function fetchAndWriteNewsData() {
         const urls = root.getChildren("url", root.getNamespace());
 
         if (!urls || urls.length === 0) {
-          Logger.log(`⚠️ No URLs found in sitemap for ${site}`);
+          Logger.log(`No URLs found in sitemap for ${site}`);
           continue;
         }
 
-        Logger.log(`✅ Found ${urls.length} URLs in sitemap.`);
+        Logger.log(`Found ${urls.length} URLs in sitemap.`);
 
         urls.forEach((urlElement, i) => {
           try {
@@ -89,22 +89,22 @@ function fetchAndWriteNewsData() {
 
             rows.push([language, baseUrl, name, title, keywords, langTag, pubDate, loc]);
           } catch (err) {
-            Logger.log(`❌ Error parsing URL element at index ${i} for ${site}: ${err.message}`);
+            Logger.log(`Error parsing URL element at index ${i} for ${site}: ${err.message}`);
           }
         });
 
       } catch (err) {
-        Logger.log(`❌ Unexpected error with ${site}: ${err.message}`);
+        Logger.log(`Unexpected error with ${site}: ${err.message}`);
       }
     }
   }
 
   if (rows.length > 0) {
     sheet.getRange(2, 1, rows.length, SHEET_HEADER.length).setValues(rows);
-    Logger.log(`✅ Written ${rows.length} rows to sheet.`);
+    Logger.log(`Written ${rows.length} rows to sheet.`);
   } else {
-    Logger.log("⚠️ No data written to sheet.");
+    Logger.log("No data written to sheet.");
   }
 
-  Logger.log("✅ Script completed.");
+  Logger.log("Script completed.");
 }
